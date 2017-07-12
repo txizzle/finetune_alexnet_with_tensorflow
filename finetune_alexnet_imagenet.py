@@ -45,8 +45,7 @@ checkpoint_path = "./tmp/finetune_alexnet/"
 
 # Create parent path if it doesn't exist
 if not os.path.isdir(checkpoint_path): os.mkdir(checkpoint_path)
-
-
+    
 # TF placeholder for graph input and output
 x = tf.placeholder(tf.float32, [batch_size, 227, 227, 3])
 y = tf.placeholder(tf.float32, [None, num_classes])

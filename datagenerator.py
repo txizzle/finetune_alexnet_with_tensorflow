@@ -14,7 +14,7 @@ wrote my own little generator.
 class ImageDataGenerator:
     def __init__(self, class_list, horizontal_flip=False, shuffle=False, 
                  mean = np.array([104., 117., 124.]), scale_size=(227, 227),
-                 nb_classes = 2):
+                 nb_classes = 1000):
         
                 
         # Init params
@@ -50,8 +50,8 @@ class ImageDataGenerator:
         """
         Random shuffle the images and labels
         """
-        images = self.images.copy()
-        labels = self.labels.copy()
+        images = list(self.images)
+        labels = list(self.labels)
         self.images = []
         self.labels = []
         
@@ -102,8 +102,15 @@ class ImageDataGenerator:
             images[i] = img
 
         # Expand labels to one hot encoding
+        # print("batch size: " + str(batch_size))
+        # print("n_classes: " + str(self.n_classes))
         one_hot_labels = np.zeros((batch_size, self.n_classes))
+        # print("one hot size: " + str(np.shape(one_hot_labels)))
+        # print("len(labels): " + str(len(labels)))
         for i in range(len(labels)):
+            # print("i: " + str(i))
+            # print("labels[i]: " + str(labels[i]))
+            # print("len(one_hot_labels[i]): " + str(len(one_hot_labels[i])))
             one_hot_labels[i][labels[i]] = 1
 
         #return array of images and labels
