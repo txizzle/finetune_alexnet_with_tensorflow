@@ -28,7 +28,7 @@ val_file = './val.txt'
 
 # Learning params
 learning_rate = 0.01
-num_epochs = 1
+num_epochs = 10
 batch_size = 128
 
 # Network params
@@ -40,7 +40,7 @@ train_layers = ['fc8', 'fc7']
 display_step = 1
 
 # Path for tf.summary.FileWriter and to store model checkpoints
-filewriter_path = "./tmp/finetune_alexnet/test"
+filewriter_path = "./tmp/finetune_alexnet/logs"
 checkpoint_path = "./tmp/finetune_alexnet/"
 
 # Create parent path if it doesn't exist
@@ -109,8 +109,8 @@ train_generator = ImageDataGenerator(train_file,
 val_generator = ImageDataGenerator(val_file, shuffle = False) 
 
 # Get the number of training/validation steps per epoch
-train_batches_per_epoch = np.floor(train_generator.data_size / batch_size).astype(np.int16)
-val_batches_per_epoch = np.floor(val_generator.data_size / batch_size).astype(np.int16)
+train_batches_per_epoch = np.floor(train_generator.data_size / batch_size).astype(np.int32)
+val_batches_per_epoch = np.floor(val_generator.data_size / batch_size).astype(np.int32)
 
 # Start Tensorflow session
 with tf.Session() as sess:
