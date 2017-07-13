@@ -28,7 +28,7 @@ val_file = './val.txt'
 
 # Learning params
 learning_rate = 0.01
-num_epochs = 10
+num_epochs = 20
 batch_size = 128
 
 # Network params
@@ -45,7 +45,10 @@ checkpoint_path = "./tmp/finetune_alexnet/"
 
 # Create parent path if it doesn't exist
 if not os.path.isdir(checkpoint_path): os.mkdir(checkpoint_path)
-    
+
+# Add global step
+global_step = tf.Variable(0, name='global_step', trainable=False)
+
 # TF placeholder for graph input and output
 x = tf.placeholder(tf.float32, [batch_size, 227, 227, 3])
 y = tf.placeholder(tf.float32, [None, num_classes])
@@ -72,7 +75,7 @@ with tf.name_scope("train"):
   
   # Create optimizer and apply gradient descent to the trainable variables
   optimizer = tf.train.GradientDescentOptimizer(learning_rate)
-  train_op = optimizer.apply_gradients(grads_and_vars=gradients)
+  train_op = optimizer.apply_gradients(grads_and_vars=gradients, global_step=global_step)
 
 # Add gradients to summary  
 for gradient, var in gradients:
@@ -112,12 +115,17 @@ val_generator = ImageDataGenerator(val_file, shuffle = False)
 train_batches_per_epoch = np.floor(train_generator.data_size / batch_size).astype(np.int32)
 val_batches_per_epoch = np.floor(val_generator.data_size / batch_size).astype(np.int32)
 
+# Limit GPU resources
+gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.75)
+
 # Start Tensorflow session
-with tf.Session() as sess:
+with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
  
   # Initialize all variables
-  sess.run(tf.global_variables_initializer())
-  
+  # sess.run(tf.global_variables_initializer())
+  # Load model from checkpoint
+  saver.restore(sess, tf.train.latest_checkpoint(checkpoint_path)
+
   # Add the model graph to TensorBoard
   writer.add_graph(sess.graph)
   
@@ -150,7 +158,7 @@ with tf.Session() as sess:
                 s = sess.run(merged_summary, feed_dict={x: batch_xs, 
                                                         y: batch_ys, 
                                                         keep_prob: 1.})
-                writer.add_summary(s, epoch*train_batches_per_epoch + step)
+                writer.add_summary(s, tf.train.global_step(sess, global_step))
                 
             step += 1
             
@@ -175,8 +183,8 @@ with tf.Session() as sess:
         print("{} Saving checkpoint of model...".format(datetime.now()))  
         
         #save checkpoint of the model
-        checkpoint_name = os.path.join(checkpoint_path, 'model_epoch'+str(epoch+1)+'.ckpt')
-        save_path = saver.save(sess, checkpoint_name)  
+        checkpoint_name = os.path.join(checkpoint_path, 'model'.ckpt')
+        save_path = saver.save(sess, checkpoint_name, global_step=global_step)
         
         print("{} Model checkpoint saved at {}".format(datetime.now(), checkpoint_name))
         
